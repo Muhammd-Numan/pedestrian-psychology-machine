@@ -1,5 +1,5 @@
 import cv2
-import pandas as pd
+from openpyxl import Workbook
 from ultralytics import YOLO
 from pathlib import Path
 from tqdm import tqdm
@@ -36,7 +36,6 @@ def main():
     writer = cv2.VideoWriter(str(out_video_path), fourcc, fps, (width, height))
 
     unique_ids = set()
-    frame_records = []
     frame_idx = 0
 
     with tqdm(total=total_frames, desc="Detecting + Tracking") as pbar:
@@ -55,8 +54,6 @@ def main():
             )
 
             boxes = results[0].boxes
-            num_people = len(boxes)
-            frame_records.append({"frame": frame_idx, "person_count": num_people})
 
             if boxes.id is not None:
                 unique_ids.update(boxes.id.cpu().numpy().astype(int).tolist())
@@ -64,13 +61,12 @@ def main():
             annotated = frame.copy()
             for box in boxes:
                 x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())
-                conf = float(box.conf[0])
                 track_id = int(box.id[0]) if box.id is not None else -1
 
                 cv2.rectangle(annotated, (x1, y1), (x2, y2), (0, 255, 0), 2)
                 cv2.putText(
                     annotated,
-                    f"ID:{track_id} {conf:.2f}",
+                    f"ID:{track_id}",
                     (x1, y1 - 6),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.5,
@@ -80,28 +76,10 @@ def main():
 
             cv2.putText(
                 annotated,
-                f"People in frame: {num_people}",
-                (15, 35),
+                f"Unique people so far: {len(unique_ids)}",
+                (15, 40),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 1.0,
-                (0, 255, 255),
-                2,
-            )
-            cv2.putText(
-                annotated,
-                f"Unique so far: {len(unique_ids)}",
-                (15, 75),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                1.0,
-                (0, 255, 255),
-                2,
-            )
-            cv2.putText(
-                annotated,
-                f"Frame: {frame_idx}",
-                (15, 115),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.7,
                 (0, 255, 255),
                 2,
             )
@@ -113,20 +91,32 @@ def main():
     cap.release()
     writer.release()
 
-    df = pd.DataFrame(frame_records)
-    csv_path = OUTPUT_DIR / f"{video_name}_counts.csv"
-    df.to_csv(csv_path, index=False)
+    # ---------- Save final summary as Excel ----------
+    summary_path = OUTPUT_DIR / f"{video_name}_summary.xlsx"
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Summary"
+    ws.append(["video_id", "number_of_unique_people"])
+    ws.append([video_name, len(unique_ids)])
+
+    # Make header bold
+    from openpyxl.styles import Font
+    bold_font = Font(bold=True)
+    ws["A1"].font = bold_font
+    ws["B1"].font = bold_font
+
+    # Auto-fit column widths
+    ws.column_dimensions["A"].width = 30
+    ws.column_dimensions["B"].width = 25
+
+    wb.save(summary_path)
 
     print("\n--- SUMMARY ---")
-    print(f"Total frames processed:        {len(df)}")
-    print(f"Average people per frame:      {df['person_count'].mean():.2f}")
-    print(f"Max people in a frame:         {df['person_count'].max()}")
-    print(f"Min people in a frame:         {df['person_count'].min()}")
-    print(f"Frames with 0 people:          {(df['person_count'] == 0).sum()}")
-    print(f"Unique pedestrians (tracked):  {len(unique_ids)}")
+    print(f"Total unique pedestrians in video: {len(unique_ids)}")
     print(f"\nOutputs saved:")
     print(f"  Annotated video: {out_video_path}")
-    print(f"  Per-frame CSV:   {csv_path}")
+    print(f"  Summary Excel:   {summary_path}")
 
 
 if __name__ == "__main__":
