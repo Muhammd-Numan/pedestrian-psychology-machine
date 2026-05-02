@@ -1,4 +1,5 @@
 # Pedestrian Psychology Machine
+Currently working on YOLOv8 + ByteTrack integration
 
 Computer vision pipeline for pedestrian detection and analysis using the JAAD dataset.
 
