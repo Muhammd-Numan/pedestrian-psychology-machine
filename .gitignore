@@ -1,0 +1,35 @@
+# Datasets
+JAAD/
+data/
+datasets/
+
+# Outputs
+outputs/
+runs/
+*.mp4
+*.avi
+*.mov
+
+# Model weights
+*.pt
+*.pth
+*.weights
+*.onnx
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+env/
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
