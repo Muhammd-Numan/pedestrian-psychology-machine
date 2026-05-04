@@ -5,7 +5,7 @@ from pathlib import Path
 from tqdm import tqdm
 
 # ---------- CONFIG ----------
-VIDEO_PATH = "test_pedestrians.mp4"
+VIDEO_PATH = "video_0003.mp4"
 OUTPUT_DIR = Path("outputs")
 OUTPUT_DIR.mkdir(exist_ok=True)
 
@@ -91,7 +91,7 @@ def main():
     cap.release()
     writer.release()
 
-    # ---------- Save final summary as Excel ----------
+    # Save final summary as Excel
     summary_path = OUTPUT_DIR / f"{video_name}_summary.xlsx"
 
     wb = Workbook()
@@ -100,13 +100,13 @@ def main():
     ws.append(["video_id", "number_of_unique_people"])
     ws.append([video_name, len(unique_ids)])
 
-    # Make header bold
+    
     from openpyxl.styles import Font
     bold_font = Font(bold=True)
     ws["A1"].font = bold_font
     ws["B1"].font = bold_font
 
-    # Auto-fit column widths
+    
     ws.column_dimensions["A"].width = 30
     ws.column_dimensions["B"].width = 25
 
