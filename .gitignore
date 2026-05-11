@@ -2,6 +2,7 @@
 JAAD/
 data/
 datasets/
+JAAD_annotations/
 
 # Outputs
 outputs/
@@ -33,3 +34,5 @@ env/
 # OS
 .DS_Store
 Thumbs.db
+
+
