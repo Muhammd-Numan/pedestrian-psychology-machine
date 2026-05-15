@@ -9,13 +9,13 @@ from pathlib import Path
 from tqdm import tqdm
 
 # ---------- CONFIG ----------
-VIDEO_PATH = "video_0001.mp4"
-JAAD_XML_PATH = "JAAD_annotations/annotations/video_0001.xml"
+VIDEO_PATH = "video_0185.mp4"
+JAAD_XML_PATH ="JAAD_annotations/annotations/video_0185.xml"
 OUTPUT_DIR = Path("outputs")
 OUTPUT_DIR.mkdir(exist_ok=True)
 
-MODEL_NAME = "yolov8n.pt"
-CONF_THRESHOLD = 0.4
+MODEL_NAME = "yolo11s.pt"
+CONF_THRESHOLD = 0.5
 PERSON_CLASS_ID = 0
 # ----------------------------
 
@@ -48,10 +48,14 @@ def main():
     if not cap.isOpened():
         raise RuntimeError(f"Could not open {VIDEO_PATH}")
 
-    print(f"Loading JAAD annotations: {JAAD_XML_PATH}")
-    gt_by_frame = parse_jaad_xml(JAAD_XML_PATH)
-    total_gt_boxes = sum(len(v) for v in gt_by_frame.values())
-    print(f"  Loaded GT for {len(gt_by_frame)} frames, {total_gt_boxes} total boxes")
+    if JAAD_XML_PATH and Path(JAAD_XML_PATH).exists():
+        print(f"Loading JAAD annotations: {JAAD_XML_PATH}")
+        gt_by_frame = parse_jaad_xml(JAAD_XML_PATH)
+        total_gt_boxes = sum(len(v) for v in gt_by_frame.values())
+        print(f"  Loaded GT for {len(gt_by_frame)} frames, {total_gt_boxes} total boxes")
+    else:
+        print("No JAAD annotations provided — running detection only.")
+        gt_by_frame = {}
 
     fps = cap.get(cv2.CAP_PROP_FPS)
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -82,7 +86,8 @@ def main():
                 classes=[PERSON_CLASS_ID],
                 conf=CONF_THRESHOLD,
                 persist=True,
-                tracker="bytetrack.yaml",
+                tracker="botsort.yaml",
+                imgsz=1280,
                 verbose=False,
             )
 
@@ -104,8 +109,8 @@ def main():
                     x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())
                     track_id = int(box.id[0]) if box.id is not None else -1
                     cv2.rectangle(annotated, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                    cv2.putText(annotated, f"YOLO ID:{track_id}", (x1, y1 - 6),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+                    #cv2.putText(annotated, f"YOLO ID:{track_id}", (x1, y1 - 6),
+                              #  cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
             # Calculate processing FPS for this frame
             elapsed = time.time() - start_time
