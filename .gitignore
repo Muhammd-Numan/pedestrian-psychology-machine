@@ -3,6 +3,7 @@ JAAD/
 data/
 datasets/
 JAAD_annotations/
+JAAD_clips
 
 # Outputs
 outputs/
