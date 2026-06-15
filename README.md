@@ -13,7 +13,7 @@ Computer vision pipeline for pedestrian detection and analysis using the JAAD da
 
 1. Clone the repo:
 ```bash
-   git clone https://github.com/YOUR_USERNAME/Pedestrian_psychology_machine.git
+   git clone https://github.com/Muhammad-Numan/Pedestrian_psychology_machine.git
    cd Pedestrian_psychology_machine
 ```
 
