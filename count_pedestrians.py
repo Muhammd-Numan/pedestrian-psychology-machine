@@ -16,7 +16,7 @@ JAAD_XML_PATH = "JAAD_annotations/annotations/video_0017.xml"             # set 
 OUTPUT_DIR = Path("outputs")
 OUTPUT_DIR.mkdir(exist_ok=True)
 
-MODEL_NAME = "yolov8l.pt"        # try yolov8l.pt if GPU allows -> fewer missed peds
+MODEL_NAME = "yolov8m.pt"        # try yolov8l.pt if GPU allows -> fewer missed peds
 PERSON_CLASS_ID = 0
 
 # --- detection ---
